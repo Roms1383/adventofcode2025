@@ -1,6 +1,6 @@
 # Advent of Code 2025
 
-![cover image](./cover.png)
+![cover image](./cover.jpg)
 > cover image generated from leonardo.ai :tm:
 
 Merrily for fun, nothing serious here. 🧝
