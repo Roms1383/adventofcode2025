@@ -3,5 +3,9 @@
 version = 4
 
 [[package]]
-name = "aoc-2025-01"
+name = "aoc-2025-01-01"
+version = "1.0.0"
+
+[[package]]
+name = "aoc-2025-01-02"
 version = "1.0.0"
