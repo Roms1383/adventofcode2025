@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**/*.md"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+      - name: 🛠 Prepare Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: 🛠 Prepare Just command runner
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+      - name: ♻️ Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: ✅ Run Cargo test
+        run: just test
