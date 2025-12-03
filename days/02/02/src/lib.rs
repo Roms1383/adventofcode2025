@@ -24,8 +24,9 @@ impl ID {
         };
         let chars = self.0.chars().collect::<Vec<_>>();
         let len = chars.len();
+        let half = len / 2;
         for i in 1.. {
-            if i == self.0.len() {
+            if i > half {
                 break;
             }
             if len.rem_euclid(i) != 0 {
