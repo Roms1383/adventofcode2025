@@ -25,6 +25,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc-2025-03-01"
+version = "1.0.0"
+dependencies = [
+ "test-case",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
