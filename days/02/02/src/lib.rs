@@ -12,19 +12,10 @@ impl ID {
         Self(id.to_string())
     }
     pub fn invalid(&self) -> bool {
-        // SAFETY: input length must be divisible by divisor
-        let same = |divisor: usize, chars: &[char]| -> bool {
-            let chunks = chars.chunks(divisor).collect::<Vec<_>>();
-            for pair in chunks.windows(2) {
-                if pair[0] != pair[1] {
-                    return false;
-                }
-            }
-            true
-        };
         let chars = self.0.chars().collect::<Vec<_>>();
         let len = chars.len();
         let half = len / 2;
+        let mut buffer = Vec::with_capacity(half);
         for i in 1.. {
             if i > half {
                 break;
@@ -32,7 +23,7 @@ impl ID {
             if len.rem_euclid(i) != 0 {
                 continue;
             }
-            if same(i, chars.as_slice()) {
+            if same(i, chars.as_slice(), &mut buffer) {
                 return true;
             }
         }
@@ -52,6 +43,17 @@ impl std::fmt::Display for ID {
 pub struct IDRange {
     start: ID,
     end: ID,
+}
+
+/// SAFETY: input length must be divisible by divisor
+fn same<'a>(divisor: usize, chars: &'a [char], buffer: &mut Vec<&'a [char]>) -> bool {
+    *buffer = chars.chunks(divisor).collect::<Vec<_>>();
+    for pair in buffer.windows(2) {
+        if pair[0] != pair[1] {
+            return false;
+        }
+    }
+    true
 }
 
 impl FromStr for IDRange {
