@@ -15,7 +15,6 @@ impl ID {
         let chars = self.0.chars().collect::<Vec<_>>();
         let len = chars.len();
         let half = len / 2;
-        let mut buffer = Vec::with_capacity(half);
         for i in 1.. {
             if i > half {
                 break;
@@ -23,7 +22,7 @@ impl ID {
             if len.rem_euclid(i) != 0 {
                 continue;
             }
-            if same(i, chars.as_slice(), &mut buffer) {
+            if same(i, chars.as_slice()) {
                 return true;
             }
         }
@@ -46,12 +45,16 @@ pub struct IDRange {
 }
 
 /// SAFETY: input length must be divisible by divisor
-fn same<'a>(divisor: usize, chars: &'a [char], buffer: &mut Vec<&'a [char]>) -> bool {
-    *buffer = chars.chunks(divisor).collect::<Vec<_>>();
-    for pair in buffer.windows(2) {
-        if pair[0] != pair[1] {
+fn same(divisor: usize, chars: &[char]) -> bool {
+    let mut iter = chars.chunks(divisor);
+    assert!(iter.len() >= 2);
+    let first = iter.next().unwrap();
+    let mut current = first;
+    for next in iter {
+        if current != next {
             return false;
         }
+        current = next;
     }
     true
 }
