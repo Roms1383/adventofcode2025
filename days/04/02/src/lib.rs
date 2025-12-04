@@ -23,20 +23,102 @@ impl Key {
 }
 
 #[derive(Debug, Clone)]
-pub struct Grid(BTreeMap<Key, Value>);
+pub struct Grid {
+    map: BTreeMap<Key, Value>,
+    max_y: usize,
+    max_x: usize,
+}
 
 impl Grid {
     pub fn accessible(&self, key: &Key) -> bool {
-        self.0
-            .iter()
-            .filter(|(_, v)| **v == Value::Roll)
-            .filter(|(k, _)| k.adjacent(key))
-            .collect::<Vec<_>>()
-            .len()
-            < 4
+        let mut count = 0;
+        let top = key.y == 0;
+        let bottom = key.y == self.max_y;
+        let left = key.x == 0;
+        let right = key.x == self.max_x;
+        // there can never be more than 3 rolls in corners
+        if (top || bottom) && (left || right) {
+            return true;
+        }
+        // horizontal
+        if !left
+            && self.map.get(&Key {
+                y: key.y,
+                x: key.x - 1,
+            }) == Some(&Value::Roll)
+        {
+            count += 1;
+        }
+        if !right
+            && self.map.get(&Key {
+                y: key.y,
+                x: key.x + 1,
+            }) == Some(&Value::Roll)
+        {
+            count += 1;
+        }
+        // vertical
+        if !top
+            && self.map.get(&Key {
+                y: key.y - 1,
+                x: key.x,
+            }) == Some(&Value::Roll)
+        {
+            count += 1;
+        }
+        if !bottom
+            && self.map.get(&Key {
+                y: key.y + 1,
+                x: key.x,
+            }) == Some(&Value::Roll)
+        {
+            count += 1;
+        }
+        // diagonal
+        // upper-left
+        if !top
+            && !left
+            && self.map.get(&Key {
+                y: key.y - 1,
+                x: key.x - 1,
+            }) == Some(&Value::Roll)
+        {
+            count += 1;
+        }
+        // upper-right
+        if !top
+            && !right
+            && self.map.get(&Key {
+                y: key.y - 1,
+                x: key.x + 1,
+            }) == Some(&Value::Roll)
+        {
+            count += 1;
+        }
+        // lower-left
+        if !bottom
+            && !left
+            && self.map.get(&Key {
+                y: key.y + 1,
+                x: key.x - 1,
+            }) == Some(&Value::Roll)
+        {
+            count += 1;
+        }
+        // lower-right
+        if !bottom
+            && !right
+            && self.map.get(&Key {
+                y: key.y + 1,
+                x: key.x + 1,
+            }) == Some(&Value::Roll)
+        {
+            count += 1;
+        }
+        count < 4
     }
     pub fn accessibles(&self) -> Vec<Key> {
-        self.0
+        self.map
             .iter()
             .filter(|(_, v)| **v == Value::Roll)
             .filter_map(|(k, _)| if self.accessible(k) { Some(k) } else { None })
@@ -60,7 +142,7 @@ impl Grid {
                 total += count;
             }
             for key in current.iter() {
-                *me.0.get_mut(key).unwrap() = Value::Empty;
+                *me.map.get_mut(key).unwrap() = Value::Empty;
             }
         }
         total
@@ -72,6 +154,8 @@ impl FromStr for Grid {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut map = BTreeMap::new();
+        let mut max_y: usize = 0;
+        let mut max_x: usize = 0;
         for (y, line) in s.lines().enumerate() {
             for (x, char) in line.chars().enumerate() {
                 match char {
@@ -79,9 +163,11 @@ impl FromStr for Grid {
                     '@' => map.insert(Key { x, y }, Value::Roll),
                     _ => panic!("invalid value ({char})"),
                 };
+                max_x = x;
             }
+            max_y = y;
         }
-        Ok(Self(map))
+        Ok(Self { map, max_x, max_y })
     }
 }
 
@@ -90,7 +176,7 @@ impl ToString for Grid {
     fn to_string(&self) -> String {
         let mut out = String::new();
         let mut last_y = 0;
-        for (k, v) in self.0.iter() {
+        for (k, v) in self.map.iter() {
             if k.y > last_y {
                 out.push('\n');
                 last_y = k.y;
