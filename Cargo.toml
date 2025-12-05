@@ -4,7 +4,7 @@ members = [
     "days/02/01", "days/02/02",
     "days/03/01", "days/03/02",
     "days/04/01", "days/04/02",
-    "days/05/01",
+    "days/05/01", "days/05/02",
 ]
 resolver = "2"
 
